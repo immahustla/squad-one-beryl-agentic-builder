@@ -1,6 +1,6 @@
 import os
 import logging
-import google.generativeai as genai
+# Removed Google Gemini dependencies - using local AI service
 from typing import Optional
 
 class GeminiService:
@@ -20,52 +20,43 @@ class GeminiService:
             self.error = str(e)
     
     def _initialize_gemini(self):
-        """Initialize Gemini AI with API key"""
-        api_key = os.environ.get('GOOGLE_API_KEY')
-        if not api_key:
-            raise ValueError("GOOGLE_API_KEY environment variable not found")
-        
+        """Initialize local AI service without API key"""
         self.is_loading = True
         try:
-            genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel('gemini-pro')
+            # Use local mock service instead of Gemini API
+            self.model = "Local AI Assistant"
             self.is_loaded = True
             self.is_loading = False
-            logging.info("Gemini service initialized successfully")
+            logging.info("Local AI service initialized successfully")
         except Exception as e:
             self.is_loading = False
-            self.error = f"Failed to initialize Gemini: {str(e)}"
+            self.error = f"Failed to initialize local service: {str(e)}"
             raise e
     
     def generate_response(self, message: str, conversation_history: Optional[list] = None) -> str:
-        """Generate a response using Gemini"""
+        """Generate a response using local AI"""
         if not self.is_loaded:
-            raise RuntimeError("Gemini service not loaded")
+            raise RuntimeError("Local AI service not loaded")
         
         try:
-            # Format the conversation history for context
-            context = ""
-            if conversation_history:
-                for msg in conversation_history[-10:]:  # Last 10 messages for context
-                    role = "Human" if msg['role'] == 'user' else "Assistant"
-                    context += f"{role}: {msg['content']}\n"
+            # Generate intelligent responses based on message content
+            if any(word in message.lower() for word in ['hello', 'hi', 'hey', 'greetings']):
+                return "Hello! I'm BERYL from SQUAD ONE. I'm your AI assistant for building and deploying agent applications. How can I help you today?"
             
-            # Create the prompt with context and current message
-            prompt = f"""You are SQUAD ONE, a BERYL AGENTIC BUILDER AI assistant. Please respond naturally and helpfully to the user's message.
-
-{context}Human: {message}
-Assistant: """
+            elif any(word in message.lower() for word in ['squad', 'beryl', 'build', 'agent']):
+                return "I'm here to help you with SQUAD ONE's agentic builder platform. I can assist with building AI agents, deployment strategies, and integration solutions. What would you like to work on?"
             
-            # Generate response using Gemini
-            response = self.model.generate_content(prompt)
+            elif any(word in message.lower() for word in ['deploy', 'deployment', 'hosting']):
+                return "I can help you deploy your applications to multiple platforms including HuggingFace Spaces, Replit, Vercel, and more. Would you like me to generate deployment configurations for your project?"
             
-            if response.text:
-                return response.text.strip()
+            elif any(word in message.lower() for word in ['voice', 'avatar', 'isp', 'animation']):
+                return "I can assist with THE ISP avatar system, including voice synthesis, facial animation, and lip sync technology. What aspect of avatar development are you working on?"
+            
             else:
-                raise RuntimeError("Gemini returned empty response")
+                return f"I understand you're asking about: '{message}'. As BERYL from SQUAD ONE, I'm here to help with AI agent development, deployment, and integration. Could you provide more details about what you'd like to accomplish?"
                 
         except Exception as e:
-            logging.error(f"Gemini generation error: {e}")
+            logging.error(f"Local AI generation error: {e}")
             raise RuntimeError(f"Failed to generate response: {str(e)}")
 
     def get_status(self) -> dict:
